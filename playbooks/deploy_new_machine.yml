@@ -1,0 +1,7 @@
+---
+
+- hosts: all
+  become: true
+  roles:
+    - role: ubuntu_template
+      tags: [ ubuntu_template ]

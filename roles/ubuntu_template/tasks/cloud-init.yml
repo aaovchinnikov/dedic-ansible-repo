@@ -1,0 +1,15 @@
+---
+
+- name: Disable cloud-init
+  block:
+    - name: Check that directory /etc/cloud/ exists
+      ansible.builtin.stat:
+        path: /etc/cloud
+      register: cloud_init_stat_result
+
+    - name: Create file /etc/cloud/cloud-init.disabled
+      when: cloud_init_stat_result.stat.isdir is defined and cloud_init_stat_result.stat.isdir
+      ansible.builtin.copy:
+        dest: /etc/cloud/cloud-init.disabled
+        content: ''
+        mode: 0644

@@ -1,0 +1,7 @@
+---
+
+- name: Configure cloud-init
+  import_tasks: cloud-init.yml
+
+- name: Configure netfilter-persistent
+  import_tasks: netfilter-persistent.yml

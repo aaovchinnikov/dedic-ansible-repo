@@ -1,0 +1,27 @@
+---
+
+- name: Install netfilter-persistent packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    cache_valid_time: 3600
+  loop:
+    - netfilter-persistent
+    - iptables-persistent
+
+- name: Create /etc/iptables folder
+  file:
+    path: /etc/iptables
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Copy IPv4 netfilter rules
+  ansible.builtin.template:
+    src: netfilter_rules.v4.j2
+    dest: /etc/iptables/rules.v4
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart netfilter-persistent
