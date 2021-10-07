@@ -25,6 +25,10 @@ all:
       3339643063396564620a646261343130663763306165633161366237383936366463383430376236
       3338
   children:
+    openvpn_server:
+      vars:
+      hosts:
+        eternal.palatan6.local:
   hosts:
     eternal.palatan6.local:
       ansible_host: !vault |

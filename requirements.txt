@@ -1,1 +1,3 @@
 ansible-core==2.11.3
+pre-commit
+yamllint
