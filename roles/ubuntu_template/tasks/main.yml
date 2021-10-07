@@ -1,5 +1,9 @@
 ---
 
+- name: Set hostname as fqdn
+  hostname:
+    name: "{{ inventory_hostname }}"
+
 - name: Configure cloud-init
   import_tasks: cloud-init.yml
 
