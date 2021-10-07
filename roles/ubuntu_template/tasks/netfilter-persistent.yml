@@ -25,3 +25,12 @@
     group: root
     mode: '0644'
   notify: Restart netfilter-persistent
+
+- name: Copy IPv6 netfilter rules
+  ansible.builtin.template:
+    src: netfilter_rules.v6.j2
+    dest: /etc/iptables/rules.v6
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart netfilter-persistent
