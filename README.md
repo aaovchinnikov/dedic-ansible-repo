@@ -15,14 +15,14 @@
 3. Подготовка окружения:
 
     ```bash
-    cd ansible-repo/
+    cd decic-ansible-repo/
     ./setup_venv.sh
     ```
 
     Скрипт `./setup_venv.sh` создает виртуальное окружение Python в каталоге `venv`. Созданное окружение содержит все необходимые зависимости для работы с репозиторием. Перед вызовом утилит ansible необходимо активировать это окружение (делается каждый раз при создании нового сеанса консоли):
 
     ```bash
-    cd ansible-repo/
+    cd decic-ansible-repo/
     . venv/bin/activate
     ```
 
@@ -41,7 +41,7 @@
 4. Переходим в каталог `playbooks`:
 
     ```bash
-    cd ansible-repo/playbooks
+    cd decic-ansible-repo/playbooks
     ```
 
 5. Создаем файл с паролем Ansible-Vault (этот пароль по соображениям безопасности отсутствует в репозитории):
