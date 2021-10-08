@@ -1,0 +1,10 @@
+---
+
+- hosts: openvpn_server
+  become: true
+  roles:
+    - role: pki
+      tags: [ pki ]
+
+    - role: openvpn_server
+      tags: [ openvpn_server ]

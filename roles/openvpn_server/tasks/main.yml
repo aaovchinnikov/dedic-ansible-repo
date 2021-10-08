@@ -1,0 +1,58 @@
+---
+
+- name: Enable IP routing
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    reload: true
+  loop:
+    - { name: net.ipv4.ip_forward, value: 1 }
+    - { name: net.ipv6.conf.all.forwarding, value: 1 }
+
+- name: Install OpenVPN package
+  ansible.builtin.apt:
+    name: openvpn
+    state: present
+    cache_valid_time: 3600
+
+- name: Set LimitMEMLOCK=268435456 in openvpn-server@.service
+  community.general.ini_file:
+    path: /lib/systemd/system/openvpn-server@.service
+    section: Service
+    option: LimitMEMLOCK
+    value: '268435456'
+    state: present
+    create: false
+    no_extra_spaces: true
+
+- name: Setup dhparam file dh4096.pem
+  async: "{{ openvpn_dhparam_timeout_secs }}"
+  poll: "{{ openvpn_dhparam_poll_interval_secs }}"
+  community.crypto.openssl_dhparam:
+    path: /etc/openvpn/server/dh4096.pem
+    state: present
+    size: 4096
+    select_crypto_backend: openssl
+    backup: false
+    force: false
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Setup server ta.key
+  register: openvpn_ta_key
+  shell:
+    executable: /bin/bash
+    cmd: openvpn --genkey --secret /etc/openvpn/server/ta.key
+    creates: /etc/openvpn/server/ta.key
+
+- name: Setup configuration file server.conf
+  template:
+    backup: false
+    dest: /etc/openvpn/server/server.conf
+    src: server.conf.j2
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+    - Restart openvpn-server@server
