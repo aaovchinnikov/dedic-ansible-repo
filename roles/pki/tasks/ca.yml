@@ -1,0 +1,47 @@
+---
+
+- name: Create private key with password protection
+  community.crypto.openssl_privatekey:
+    select_crypto_backend: cryptography
+    path: "{{ ca_key_path }}"
+    type: "RSA"
+    size: 4096
+    passphrase: "{{ pki_ca_key_passphrase }}"
+    cipher: auto
+
+- name: Create certificate signing request (CSR) for CA certificate
+  community.crypto.openssl_csr_pipe:
+    select_crypto_backend: cryptography
+    privatekey_path: "{{ ca_key_path }}"
+    privatekey_passphrase: "{{ pki_ca_key_passphrase }}"
+    common_name: "{{ pki_ca_cn }}"
+    use_common_name_for_san: false  # since we do not specify SANs, don't use CN as a SAN
+    basic_constraints:
+      - 'CA:TRUE'
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+    key_usage_critical: true
+  register: ca_csr
+  changed_when: false
+
+- name: Create self-signed CA certificate from CSR
+  community.crypto.x509_certificate:
+    select_crypto_backend: cryptography
+    path: "{{ ca_cert_path }}"
+    csr_content: "{{ ca_csr.csr }}"
+    privatekey_path: "{{ ca_key_path }}"
+    privatekey_passphrase: "{{ pki_ca_key_passphrase }}"
+    provider: selfsigned
+
+- name: Generate a CRL
+  community.crypto.x509_crl:
+    path: "{{ crl_path }}"
+    privatekey_path: "{{ ca_key_path }}"
+    privatekey_passphrase: "{{ pki_ca_key_passphrase }}"
+    issuer:
+      CN: "{{ pki_ca_cn }}"
+    last_update: "+0s"
+    next_update: "+7d"
+    revoked_certificates: "{{ pki_revoked_certificates }}"
+  changed_when: false

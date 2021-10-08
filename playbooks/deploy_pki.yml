@@ -1,0 +1,7 @@
+---
+
+- hosts: pki
+  become: true
+  roles:
+    - role: pki
+      tags: [ pki ]

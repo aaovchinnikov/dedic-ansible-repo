@@ -1,0 +1,51 @@
+---
+
+- name: Remove pki directory
+  file:
+    state: absent
+    path: "{{ pki_dir }}"
+  when:
+    - pki_reinitialize is defined
+    - pki_reinitialize | bool
+
+- set_fact:
+    pki_keys_dir: "{{ pki_dir }}/keys"
+    pki_certs_dir: "{{ pki_dir }}/certs"
+
+- set_fact:
+    pki_server_keys_dir: "{{ pki_keys_dir }}/server"
+    pki_server_certs_dir: "{{ pki_certs_dir }}/server"
+    pki_user_keys_dir: "{{ pki_keys_dir }}/user"
+    pki_user_certs_dir: "{{ pki_certs_dir }}/user"
+
+- set_fact:
+    ca_key_path: "{{ pki_keys_dir }}/ca.key"
+    ca_cert_path: "{{ pki_certs_dir }}/ca.crt"
+    crl_path: "{{ pki_dir }}/crl.crl"
+
+- name: Create pki dirs
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode}}"
+  loop:
+    - { path: "{{ pki_dir }}", mode: '0755' }
+    - { path: "{{ pki_keys_dir }}", mode: '0700' }
+    - { path: "{{ pki_certs_dir }}", mode: '0755' }
+    - { path: "{{ pki_server_keys_dir }}", mode: '0700' }
+    - { path: "{{ pki_server_certs_dir }}", mode: '0755' }
+    - { path: "{{ pki_user_keys_dir }}", mode: '0700' }
+    - { path: "{{ pki_user_certs_dir }}", mode: '0755' }
+
+- name: Create CA
+  ansible.builtin.import_tasks: ca.yml
+
+- name: Create server certificates
+  ansible.builtin.include_tasks: server.yml
+  loop: "{{ pki_server_certificates }}"
+
+- name: Create user certificates
+  ansible.builtin.include_tasks: user.yml
+  loop: "{{ pki_user_certificates }}"

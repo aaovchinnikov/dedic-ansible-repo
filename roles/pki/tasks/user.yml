@@ -1,0 +1,41 @@
+---
+
+- set_fact:
+    user_key_path: "{{ pki_user_keys_dir }}/{{ item.filename_base }}.key"
+    user_cert_path: "{{ pki_user_certs_dir }}/{{ item.filename_base }}.crt"
+
+- name: Create private key for user {{ item.cn }}
+  community.crypto.openssl_privatekey:
+    select_crypto_backend: cryptography
+    path: "{{ user_key_path }}"
+    type: "RSA"
+    size: 4096
+
+- name: Create certificate signing request (CSR) for user certificate
+  community.crypto.openssl_csr_pipe:
+    select_crypto_backend: cryptography
+    privatekey_path: "{{ user_key_path }}"
+    common_name: "{{ item.cn }}"
+    use_common_name_for_san: false
+    basic_constraints_critical: true
+    key_usage:
+      - digitalSignature
+      - keyAgreement
+    key_usage_critical: true
+    extended_key_usage:
+      - clientAuth
+    extended_key_usage_critical: true
+  register: user_csr
+  changed_when: false
+
+- name: Sign certificate with our CA
+  community.crypto.x509_certificate:
+    select_crypto_backend: cryptography
+    provider: ownca
+    path: "{{ user_cert_path }}"
+    csr_content: "{{ user_csr.csr }}"
+    ownca_path: "{{ ca_cert_path }}"
+    ownca_privatekey_path: "{{ ca_key_path }}"
+    ownca_privatekey_passphrase: "{{ pki_ca_key_passphrase }}"
+    ownca_not_after: "+730d"  # valid for two years
+    ownca_not_before: "-1d"  # valid since yesterday
