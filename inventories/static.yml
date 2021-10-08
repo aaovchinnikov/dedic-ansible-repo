@@ -27,6 +27,29 @@ all:
   children:
     openvpn_server:
       vars:
+        openvpn_dhparam_timeout_secs: 3600
+        openvpn_dhparam_poll_interval_secs: 5
+      hosts:
+        eternal.palatan6.local:
+    pki:
+      vars:
+        pki_dir: /opt/pki
+        pki_ca_cn: Palata N6 Root CA
+        pki_ca_key_passphrase: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          31303536356664616430656638366566623162306231396234633738366337353439623634376635
+          6131303038323765373630323234303531613437623333630a346466353730383834323932666537
+          66656335346561643966613365626330373139663433643562636462633635653633633836366639
+          3062326235633730660a333861623738343732633163313939316239313236313332613030643736
+          3062
+        pki_revoked_certificates: []
+        pki_server_certificates:
+          - cn: OpenVPN Server
+            san: []
+            filename_base: openvpn_server
+        pki_user_certificates:
+          - cn: sansey
+            filename_base: sansey
       hosts:
         eternal.palatan6.local:
   hosts:
